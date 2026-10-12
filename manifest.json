@@ -1,0 +1,30 @@
+{
+    "manifest_version": 3,
+    "name": "Footballia Enhanced",
+    "version": "1.0",
+    "description": "Add API-FOOTBALL match data to Footballia matches",
+    "icons": {
+        "16":"images/icon-16.png",
+        "32":"images/icon-32.png",
+        "48":"images/icon-48.png",
+        "128":"images/icon-128.png"
+    },
+    "content_scripts":[
+        {
+            "js": ["scripts/content.js"],
+            "matches": [
+                "https://footballia.net/*"
+            ],
+            "include_globs": [
+                "*footballia.net/matches/*",
+                "*footballia.net/es/partidos-completos/*",
+                "*footballia.net/fr/matchs-complets/*",
+                "*footballia.net/it/partite-complete/*",
+                "*footballia.net/de/ganze-spiele/*",
+                "*footballia.net/pt/jogos-completos/*",
+                "*footballia.net/tr/matches/*",
+                "*footballia.net/hr/matches/*"
+            ]
+        }
+    ]
+}
