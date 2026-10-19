@@ -1,7 +1,5 @@
-console.log("ON");
 let teamsString = document.querySelector("div.description.m-t.blog-entry h1").textContent;
 let competitionString = document.querySelector("div.description.m-t.blog-entry h2").textContent;
-console.log(teamsString + " " + competitionString);
 
 const teams = teamsString.split(/\s+vs\.?\s+/i);
 const team1 = teams[0].trim();
@@ -24,6 +22,12 @@ function filterSecondTeam(stringToFilter){
 console.log(team1);
 console.log(team2);
 
+const match = competitionString.match(/^(.*?)\s+(\d{4})$/);
+const competicao = match[1];
+const ano = match[2];
+
+console.log(competicao);
+console.log(ano);
 
 //Atlético Mineiro vs. Goiás EC full match Campeonato Brasileiro 2004
 /* 
