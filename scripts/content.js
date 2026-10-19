@@ -1,26 +1,29 @@
 console.log("ON");
-let teams = document.querySelector("div.description.m-t.blog-entry h1").textContent;
-let competition = document.querySelector("div.description.m-t.blog-entry h2").textContent;
-console.log(teams + " " + competition);
+let teamsString = document.querySelector("div.description.m-t.blog-entry h1").textContent;
+let competitionString = document.querySelector("div.description.m-t.blog-entry h2").textContent;
+console.log(teamsString + " " + competitionString);
 
-const partes = teams.split(/\s+vs\.?\s+/i);
-const time1 = partes[0].trim();
+const teams = teamsString.split(/\s+vs\.?\s+/i);
+const team1 = teams[0].trim();
+const team2 = filterSecondTeam(teams[1].trim())
 
-const resto = partes[1].trim();
-const palavras = resto.split(' ');
+function filterSecondTeam(stringToFilter){
+    filterAux = stringToFilter.split(' ');
+    let lastUppercaseIndex = 0;
 
-let ultimoIndiceMaiusculo = 0;
+    filterAux.forEach((word, index) => {
+        if(/^\p{Lu}/u.test(word)){
+            lastUppercaseIndex = index;
+        }
+    });
 
-palavras.forEach((palavra, index) => {
-    if(/^\p{Lu}/u.test(palavra)){
-        ultimoIndiceMaiusculo = index;
-    }
-});
+    const team2 = filterAux.slice(0, lastUppercaseIndex + 1).join(' ');
+    return team2;
+}
 
-const time2 = palavras.slice(0, ultimoIndiceMaiusculo + 1).join(' ');
+console.log(team1);
+console.log(team2);
 
-console.log(time1);
-console.log(time2);
 
 //Atlético Mineiro vs. Goiás EC full match Campeonato Brasileiro 2004
 /* 
