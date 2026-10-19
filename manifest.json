@@ -13,7 +13,8 @@
         {
             "js": ["scripts/content.js"],
             "matches": [
-                "https://footballia.net/*"
+                "https://footballia.net/*",
+                "https://footballia.eu/*"
             ],
             "include_globs": [
                 "*footballia.net/matches/*",
