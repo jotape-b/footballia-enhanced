@@ -1,14 +1,26 @@
+console.log("on");
 let teamsString = document.querySelector("div.description.m-t.blog-entry h1").textContent;
 let competitionString = document.querySelector("div.description.m-t.blog-entry h2").textContent;
 
 const teams = findTeams(teamsString);
 const match = findCompetitionAndSeason(competitionString);
-const filteredData = teams.concat(match);
-console.log(filteredData[0]);
-console.log(filteredData[1]);
-console.log(filteredData[2]);
-console.log(filteredData[3]);
+const filteredData = {
+    home: teams[0],
+    away: teams[1],
+    competition: match[0],
+    season: match[1]
+};
 
+chrome.runtime.sendMessage(
+    { type: "API_SEND", payload: filteredData },
+    (res) => {
+        if (chrome.runtime.lastError) {
+            console.error("Communication error:", chrome.runtime.lastError);
+            return;
+        }
+        console.log("Status:", res.status);
+    }
+);
 
 function findTeams(teamsString) {
     const teams = teamsString.split(/\s+vs\.?\s+/i);
