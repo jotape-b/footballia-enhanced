@@ -1,14 +1,11 @@
-console.log("on");
-let teamsString = document.querySelector("div.description.m-t.blog-entry h1").textContent;
-let competitionString = document.querySelector("div.description.m-t.blog-entry h2").textContent;
+const teamsString = document.querySelector("div.description.m-t.blog-entry h1").textContent;
+const playingDate = document.querySelector('[itemprop="startDate"]').getAttribute('content');
 
 const teams = findTeams(teamsString);
-const match = findCompetitionAndSeason(competitionString);
 const filteredData = {
     home: teams[0],
     away: teams[1],
-    competition: match[0],
-    season: match[1]
+    date: playingDate
 };
 
 chrome.runtime.sendMessage(
@@ -42,13 +39,6 @@ function filterSecondTeam(stringToFilter) {
     const team2 = filterAux.slice(0, lastUppercaseIndex + 1).join(' ');
     return team2;
 }
-
-function findCompetitionAndSeason(competitionString) {
-    const match = competitionString.match(/^(.*?)\s+(\d{4})$/);
-    const filteredMatch = [match[1], match[2]];
-    return filteredMatch;
-}
-
 
 //Atlético Mineiro vs. Goiás EC full match Campeonato Brasileiro 2004
 /*

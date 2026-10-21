@@ -22,7 +22,6 @@ chrome.runtime.onMessage.addListener((msg, remetente, sendRes) => {
         return true;
     }
 });
-
 /*
 const myHeaders = new Headers();
 myHeaders.append("x-apisports-key", "XxXxXxXxXxXxXxXxXxXxXxXx");
@@ -33,22 +32,22 @@ const requestOptions = {
     redirect: 'follow'
 };
 
-async function getCompetition(competition){
-    const url = `https://v3.football.api-sports.io/leagues?$`;
+async function getTeam(team){
+    const params = new URLSearchParams();
+    params.append("search", team)
+    const url = `https://v3.football.api-sports.io/teams?${params}`;
     try{
         const response = await fetch(url);
         if(!response.ok){
             throw new Error(`Response status: ${response.status}`);
         }
-
         const result = await response.json();
-        console.log(result);
+        return result;
     } catch (error){
         console.error(error.message);
     }
 }
 
-function getTeams();
 function getFixture();
 function getMatchStats();
 
