@@ -16,15 +16,14 @@ chrome.runtime.sendMessage(
             return;
         }
         console.log("Status:", res.status);
+        console.log("API response:", res.data);
     }
 );
 
 function findTeams(teamsString) {
     const teams = teamsString.split(/\s+vs\.?\s+/i);
     const team1 = normalizeName(teams[0]);
-    const team2 = filterSecondTeam(teams[1].trim())
-    console.log(team1);
-    console.log(team2);
+    const team2 = filterSecondTeam(teams[1].trim());
     return [team1, team2];
 }
 
