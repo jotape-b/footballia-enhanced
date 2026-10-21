@@ -9,14 +9,10 @@
         "48": "images/icon-48.png",
         "128": "images/icon-128.png"
     },
-    "permissions": [
-        "storage"
-    ],
-    "host_permissions": [
-        "https://api.externa.com/*"
-    ],
+    "permissions": ["storage"],
     "background": {
-        "service_worker": "scripts/background.js"
+        "service_worker": "scripts/background.js",
+        "type": "module"
     },
     "content_scripts": [
         {

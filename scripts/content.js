@@ -58,4 +58,4 @@ Remover "full match"
 Separar competição
 Separar temporada
 */
-//https://footballia.eu/pt/jogos-completos/atletico-mineiro-goias-ec
+//https://footballia.net/pt/jogos-completos/atletico-mineiro-goias-ec
