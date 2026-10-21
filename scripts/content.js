@@ -21,8 +21,10 @@ chrome.runtime.sendMessage(
 
 function findTeams(teamsString) {
     const teams = teamsString.split(/\s+vs\.?\s+/i);
-    const team1 = teams[0].trim();
+    const team1 = normalizeName(teams[0]);
     const team2 = filterSecondTeam(teams[1].trim())
+    console.log(team1);
+    console.log(team2);
     return [team1, team2];
 }
 
@@ -36,8 +38,17 @@ function filterSecondTeam(stringToFilter) {
         }
     });
 
-    const team2 = filterAux.slice(0, lastUppercaseIndex + 1).join(' ');
+    const rawTeam2 = filterAux.slice(0, lastUppercaseIndex + 1).join(' ');
+    const team2 = normalizeName(rawTeam2);
     return team2;
+}
+
+function normalizeName(name) {
+    return name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
 }
 
 //Atlético Mineiro vs. Goiás EC full match Campeonato Brasileiro 2004
