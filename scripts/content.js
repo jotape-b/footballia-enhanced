@@ -23,6 +23,7 @@ chrome.runtime.sendMessage(
 function findTeams(teamsString) {
     const teams = teamsString.split(/\s+vs\.?\s+/i);
     const team1 = normalizeName(teams[0]);
+    console.log(team1);
     const team2 = filterSecondTeam(teams[1].trim());
     return [team1, team2];
 }
