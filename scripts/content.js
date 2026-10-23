@@ -50,13 +50,4 @@ function normalizeName(name) {
         .toLowerCase()
         .trim();
 }
-
-//Atlético Mineiro vs. Goiás EC full match Campeonato Brasileiro 2004
-/*
-Remover "vs."
-Separar mandante e visitante
-Remover "full match"
-Separar competição
-Separar temporada
-*/
-//https://footballia.net/pt/jogos-completos/atletico-mineiro-goias-ec
+//https://footballia.net/fr/matchs-complets/fc-kobenhavn-brondby-if
