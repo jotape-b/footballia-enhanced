@@ -15,12 +15,12 @@ async function getTeamId(team) {
     return teamId;
 }
 
-export async function getFixture(team, date) {
+export async function getFixtureStats(team, date) {
     const teamId = await getTeamId(team);
 
-    const proxyUrl = new URL("https://api-proxy.jpepeu2005.workers.dev");
-    const route = `/fixtures/between/${date}/${date}/${teamId}`;
-    const url = new URL(`${proxyUrl}${route}`);
+    const url = new URL("https://api-proxy.jpepeu2005.workers.dev");
+    url.pathname = `/fixtures/between/${date}/${date}/${teamId}`;
+    url.searchParams.set("include", "statistics");
 
     const response = await fetch(url);
 
