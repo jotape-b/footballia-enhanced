@@ -1,4 +1,4 @@
-export async function getTeamId(team) {
+async function getTeamId(team) {
     const proxyUrl = new URL("https://api-proxy.jpepeu2005.workers.dev");
     const route = `/teams/search/${team}`;
 

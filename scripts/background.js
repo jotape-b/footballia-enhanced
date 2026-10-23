@@ -1,8 +1,8 @@
-import { getTeamId } from './api.js'
+import { getFixture } from './api.js'
 
 chrome.runtime.onMessage.addListener((msg, sender, sendRes) => {
     if (msg.type === "API_SEND") {
-        getTeamId(msg.payload.home)
+        getFixture(msg.payload.home, msg.payload.date)
             .then(APIData => {
                 chrome.storage.local.set({ lastApiResponse: APIData }, () => {
                     sendRes({ status: "success", data: APIData });
