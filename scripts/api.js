@@ -20,7 +20,7 @@ export async function getFixtureStats(team, date) {
 
     const url = new URL("https://api-proxy.jpepeu2005.workers.dev");
     url.pathname = `/fixtures/between/${date}/${date}/${teamId}`;
-    url.searchParams.set("include", "statistics");
+    url.searchParams.set("include", "statistics;statistics.type");
 
     const response = await fetch(url);
 
@@ -29,5 +29,5 @@ export async function getFixtureStats(team, date) {
     }
 
     const data = await response.json();
-    return data;
+    return data.data[0].statistics;
 }
