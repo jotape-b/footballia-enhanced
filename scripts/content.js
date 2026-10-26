@@ -17,8 +17,58 @@ chrome.runtime.sendMessage(
         }
         console.log("Status:", res.status);
         console.log("API response:", res.data);
+        renderFixtureStats(res.data, filteredData.home, filteredData.away);
     }
 );
+
+function renderFixtureStats(data, home, away) {
+    const targetElement = document.querySelector("#match > div.row");
+
+    const statsContainer = document.createElement("div");
+    statsContainer.id = "custom-injected-stats";
+
+    const table = document.createElement("table");
+    table.innerHTML = `
+        <thead>
+        <tr>
+            <th>Statistic</th>
+            <th>${home}</th>
+            <th>${away}</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector("tbody");
+    const groupedStats = new Map();
+
+    data.data[0].statistics.forEach(stat => {
+        const statName = stat.type.name;
+
+        if (!groupedStats.has(statName)) {
+            groupedStats.set(statName, { home: 0, away: 0 });
+        }
+
+        if (stat.location === "home") {
+            groupedStats.get(statName).home = stat.data.value;
+        } else if (stat.location === "away") {
+            groupedStats.get(statName).away = stat.data.value;
+        }
+    });
+
+    groupedStats.forEach((values, statName) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${statName}</td>
+            <td>${values.home}</td>
+            <td>${values.away}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    statsContainer.appendChild(table);
+    targetElement.appendChild(statsContainer);
+}
 
 function findTeams(teamsString) {
     const teams = teamsString.split(/\s+vs\.?\s+/i);

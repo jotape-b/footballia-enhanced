@@ -29,5 +29,5 @@ export async function getFixtureStats(team, date) {
     }
 
     const data = await response.json();
-    return data.data[0].statistics;
+    return data;
 }
