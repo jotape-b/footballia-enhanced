@@ -308,8 +308,11 @@ function filterSecondTeam(stringToFilter) {
 function normalizeName(name) {
     return name
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\u0300-\u036f]/g, "") //Remover acentos
         .toLowerCase()
+        .replace(/[.,]/g, "") //Remover pontos e vírgulas
+        .replace(/\b(fc|ec|sc|ac|rc|cf|saf|sad|if|bk|st)\b/g, "") //Remover sufixos/prefixos exatos
+        .replace(/\s+/g, " ") //Remover espaços duplos deixados pela remoção
         .trim();
 }
 //https://footballia.net/fr/matchs-complets/fc-kobenhavn-brondby-if
