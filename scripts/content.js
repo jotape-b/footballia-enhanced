@@ -17,26 +17,46 @@ chrome.runtime.sendMessage(
         }
         console.log("Status:", res.status);
         console.log("API response:", res.data.data[0]);
-        renderMatchDashboard(res.data.data[0]);
+        renderFixtureDashboard(res.data.data[0]);
     }
 );
 
-function renderMatchDashboard(apiData) {
-    // 1. Target the right column instead of the raw row
-    const parentRow = document.querySelector('#match > div.row');
-    if (!parentRow) {
-        console.error('Target element "#match > div.row" not found.');
+function renderFixtureDashboard(apiData) {
+    const parentContainer = document.querySelector('#match > div.row');
+    if (!parentContainer) {
+        console.error('Target element not found.');
         return;
     }
 
-    // Grabs the last child of the row, which is typically the right sidebar containing the social icons
-    const targetContainer = parentRow.lastElementChild;
+    const targetContainer = parentContainer.lastElementChild;
 
-    // 2. Extract Teams
+    //Extract Teams & Score
     const homeTeam = apiData.participants.find(p => p.meta.location === 'home');
     const awayTeam = apiData.participants.find(p => p.meta.location === 'away');
 
-    // 3. Process Statistics
+    const currentScores = apiData.scores ? apiData.scores.filter(s => s.description === "CURRENT") : [];
+    const homeScore = currentScores.find(s => s.participant_id === homeTeam.id)?.score.goals || 0;
+    const awayScore = currentScores.find(s => s.participant_id === awayTeam.id)?.score.goals || 0;
+    const matchState = 'FT';
+
+    const headerHTML = `
+        <div class="match-header">
+            <div class="team home-team">
+                <span class="team-name">${homeTeam.name}</span>
+                <img src="${homeTeam.image_path}" class="team-logo" alt="Home">
+            </div>
+            <div class="score-container">
+                <div class="match-state">${matchState}</div>
+                <div class="score-box">${homeScore} - ${awayScore}</div>
+            </div>
+            <div class="team away-team">
+                <img src="${awayTeam.image_path}" class="team-logo" alt="Away">
+                <span class="team-name">${awayTeam.name}</span>
+            </div>
+        </div>
+    `;
+
+    //Process Statistics
     const statsMap = {};
     if (apiData.statistics) {
         apiData.statistics.forEach(stat => {
@@ -68,7 +88,7 @@ function renderMatchDashboard(apiData) {
     }
     statsHTML += '</div>';
 
-    // 4. Process Sidelined (Preview)
+    //Process Sidelined Players (Match Preview)
     const homeSidelined = apiData.sidelined ? apiData.sidelined.filter(s => s.participant_id === homeTeam.id) : [];
     const awaySidelined = apiData.sidelined ? apiData.sidelined.filter(s => s.participant_id === awayTeam.id) : [];
 
@@ -85,17 +105,47 @@ function renderMatchDashboard(apiData) {
     const sidelinedHTML = `
         <div class="sidelined-layout">
             <div class="team-column">
-                <div class="column-header">${homeTeam.short_code}: ${homeSidelined.length}</div>
+                <div class="column-header">${homeSidelined.length} players</div>
                 ${homeSidelined.map(createPlayerCard).join('')}
             </div>
             <div class="team-column">
-                <div class="column-header">${awayTeam.short_code}: ${awaySidelined.length}</div>
+                <div class="column-header">${awaySidelined.length} players</div>
                 ${awaySidelined.map(createPlayerCard).join('')}
             </div>
         </div>
     `;
 
-    // 5. Process Events
+    // Process Location Info (Match Preview)
+    let locationHTML = '';
+    if (apiData.venue) {
+        const venue = apiData.venue;
+        locationHTML = `
+            <div class="venue-container">
+                <img src="${venue.image_path}" class="venue-image" alt="Venue" onerror="this.style.display='none'">
+                <div class="venue-details">
+                    <div class="venue-label">Venue</div>
+                    <div class="venue-value">${venue.name}</div>
+                    <div class="venue-label">Capacity</div>
+                    <div class="venue-value">${venue.capacity || 'N/A'}</div>
+                    <div class="venue-label">Surface</div>
+                    <div class="venue-value">${venue.surface || 'N/A'}</div>
+                    <div class="venue-label">City</div>
+                    <div class="venue-value">${venue.city_name || 'N/A'}</div>
+                    <div class="venue-label">Address</div>
+                    <div class="venue-value">${venue.address || 'N/A'}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Combine Match Preview Content
+    const matchPreviewHTML = `
+        <div class="section-title">Sidelined</div>
+        ${sidelinedHTML}
+        ${locationHTML ? `<div class="section-title">Location Info</div>${locationHTML}` : ''}
+    `;
+
+    // Process Events
     const sortedEvents = apiData.events ? apiData.events.sort((a, b) => a.minute - b.minute) : [];
     let eventsHTML = '<div class="events-wrapper">';
     sortedEvents.forEach(event => {
@@ -114,17 +164,39 @@ function renderMatchDashboard(apiData) {
     });
     eventsHTML += '</div>';
 
-    // 6. Responsive CSS Styles for Sidebars
+    // Responsive CSS Styles
     const styles = `
         .dashboard-wrapper { width: 100%; max-width: 100%; margin-top: 20px; box-sizing: border-box; clear: both; }
-        .match-dashboard { font-family: sans-serif; background: #fff; padding: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; border: 1px solid #eef0f2; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .tab-navigation { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
-        .tab-btn { flex: 1 1 auto; background: #f8f9fa; border: 1px solid #ddd; padding: 6px 10px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0b132b; transition: 0.2s; text-align: center; }
+        .match-dashboard { font-family: sans-serif; background: #fff; border-radius: 8px; width: 100%; box-sizing: border-box; border: 1px solid #eef0f2; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        /* Header CSS */
+        .match-header { display: flex; justify-content: space-around; align-items: center; background: #0b132b; color: #fff; padding: 25px 15px; }
+        .team { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 14px; flex: 1; }
+        .home-team { justify-content: flex-end; }
+        .away-team { justify-content: flex-start; }
+        .team-logo { width: 35px; height: 35px; object-fit: contain; }
+        .score-container { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; margin: 0 15px; }
+        .match-state { font-size: 11px; margin-bottom: 6px; color: #a9b0c0; font-weight: bold; letter-spacing: 1px; }
+        .score-box { background: #050914; padding: 6px 16px; border-radius: 20px; font-size: 18px; font-weight: bold; letter-spacing: 3px; }
+
+        /* Tabs CSS */
+        .tab-navigation { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 20px 15px 10px; background: #fff; }
+        .tab-btn { flex: 1 1 auto; background: #f8f9fa; border: 1px solid #ddd; padding: 8px 10px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0b132b; transition: 0.2s; text-align: center; }
         .tab-btn.active { background: #0b132b; color: #fff; border-color: #0b132b; }
-        .tab-content { display: none; }
+        .tab-content { display: none; padding: 15px; background: #fff; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Section Titles (Preview Tab) */
+        .section-title { text-align: center; font-weight: 800; color: #0b132b; margin: 15px 0 20px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Venue CSS */
+        .venue-container { display: flex; flex-direction: column; gap: 15px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #f0f0f0; }
+        .venue-image { width: 100%; height: auto; border-radius: 6px; object-fit: cover; }
+        .venue-details { font-size: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .venue-label { color: #888; font-size: 11px; margin-bottom: 2px; }
+        .venue-value { color: #222; font-weight: bold; margin-bottom: 8px; }
 
         /* Stats CSS */
         .stat-item { margin-bottom: 15px; }
@@ -139,8 +211,8 @@ function renderMatchDashboard(apiData) {
         /* Sidelined CSS */
         .sidelined-layout { display: flex; flex-direction: column; gap: 15px; }
         .team-column { flex: 1; }
-        .column-header { text-align: left; color: #555; margin-bottom: 10px; font-size: 13px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .sidelined-card { display: flex; align-items: center; padding: 8px; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 8px; background: #fafafa; }
+        .column-header { text-align: center; color: #888; margin-bottom: 12px; font-size: 12px; font-weight: bold; }
+        .sidelined-card { display: flex; align-items: center; padding: 8px; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .player-avatar { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; object-fit: cover; background: #ddd; }
         .player-name { font-weight: bold; font-size: 12px; color: #333; }
         .injury-type { font-size: 11px; color: #888; margin-top: 2px; }
@@ -154,9 +226,12 @@ function renderMatchDashboard(apiData) {
         .event-players { font-weight: bold; font-size: 12px; color: #333; }
         .event-type { font-size: 11px; color: #888; margin-top: 2px; }
         
-        /* Scrollbar customization for events */
-        .events-wrapper::-webkit-scrollbar { width: 4px; }
-        .events-wrapper::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        /* Responsive break for slightly wider sidebars */
+        @media (min-width: 380px) {
+            .venue-container { flex-direction: row; align-items: center; }
+            .venue-image { width: 140px; }
+            .venue-details { display: block; }
+        }
     `;
 
     // 7. Build the final DOM structure
@@ -166,10 +241,12 @@ function renderMatchDashboard(apiData) {
     dashboardWrapper.innerHTML = `
         <style>${styles}</style>
         <div class="match-dashboard">
+            ${headerHTML}
+            
             <div class="tab-navigation">
                 <button class="tab-btn active" data-target="tab-events">Events</button>
-                <button class="tab-btn" data-target="tab-preview">Preview</button>
-                <button class="tab-btn" data-target="tab-stats">Stats</button>
+                <button class="tab-btn" data-target="tab-preview">Match Preview</button>
+                <button class="tab-btn" data-target="tab-stats">Statistics</button>
             </div>
 
             <div id="tab-events" class="tab-content active">
@@ -177,7 +254,7 @@ function renderMatchDashboard(apiData) {
             </div>
 
             <div id="tab-preview" class="tab-content">
-                ${sidelinedHTML}
+                ${matchPreviewHTML}
             </div>
 
             <div id="tab-stats" class="tab-content">
@@ -186,10 +263,9 @@ function renderMatchDashboard(apiData) {
         </div>
     `;
 
-    // Appends to the right column, placing it neatly underneath the social icons
     targetContainer.appendChild(dashboardWrapper);
 
-    // 8. Attach Tab Switching Logic
+    // Attach Tab Switching Logic
     const tabButtons = dashboardWrapper.querySelectorAll('.tab-btn');
     const tabContents = dashboardWrapper.querySelectorAll('.tab-content');
 
@@ -204,6 +280,7 @@ function renderMatchDashboard(apiData) {
         });
     });
 }
+
 
 function findTeams(teamsString) {
     const teams = teamsString.split(/\s+vs\.?\s+/i);
