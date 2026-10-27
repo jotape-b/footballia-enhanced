@@ -1,8 +1,6 @@
 async function getTeamId(team) {
-    const proxyUrl = new URL("https://api-proxy.jpepeu2005.workers.dev");
-    const route = `/teams/search/${team}`;
-
-    const url = new URL(`${proxyUrl}${route}`);
+    const url = new URL("https://api-proxy.jpepeu2005.workers.dev");
+    url.pathname =`/teams/search/${team}`;
 
     const response = await fetch(url);
 
